@@ -151,7 +151,7 @@ resource logicApp 'Microsoft.Web/sites@2022-09-01' = {
 }
 // ========== Logic app web app ==========
 
-module onPurchased './on_purchased_workflow.bicep' = {
+/* module onPurchased './on_purchased_workflow.bicep' = {
   name: '${packName}-pack-deploy-on-purchased-${deploymentName}'
   params: {
     deploymentName: deploymentName
@@ -231,4 +231,4 @@ module onRenewed './on_renewed_workflow.bicep' = {
     eventGridConnectionName: eventGridConnectionName
     eventGridTopicName: eventGridTopicName
   }
-}
+} */
