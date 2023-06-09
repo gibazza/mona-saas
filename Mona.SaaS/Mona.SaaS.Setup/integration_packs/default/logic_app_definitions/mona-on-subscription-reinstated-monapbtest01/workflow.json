@@ -1,0 +1,210 @@
+{
+  "kind": "Stateful",
+  "definition": {
+    "metadata": {
+      "ExportMetadata": {
+        "ExportCorrelationId": "d6151091-12a4-44a2-b7d7-e5b362b29f72",
+        "ExportDate": "2023-06-09T13:18:36"
+      }
+    },
+    "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+    "contentVersion": "1.0.0.0",
+    "triggers": {
+      "When_a_subscription_is_reinstated": {
+        "splitOn": "@triggerBody()",
+        "type": "ApiConnectionWebhook",
+        "inputs": {
+          "body": {
+            "properties": {
+              "destination": {
+                "endpointType": "WebHook",
+                "properties": {
+                  "endpointUrl": "@{listCallbackUrl()}"
+                }
+              },
+              "filter": {
+                "includedEventTypes": [
+                  "Mona.SaaS.Marketplace.SubscriptionReinstated"
+                ]
+              },
+              "topic": "/subscriptions/abc12fe2-027b-4368-af6e-e66a793dfa08/resourceGroups/rg-mona-dev-uksouth-zju2y264yoreq/providers/Microsoft.EventGrid/topics/mona-events-monapbtest01"
+            }
+          },
+          "host": {
+            "connection": {
+              "name": "@parameters('$connections')['eventGrid']['connectionId']"
+            }
+          },
+          "path": "/subscriptions/abc12fe2-027b-4368-af6e-e66a793dfa08/providers/Microsoft.EventGrid.Topics/resource/eventSubscriptions",
+          "queries": {
+            "x-ms-api-version": "2017-06-15-preview"
+          }
+        }
+      }
+    },
+    "actions": {
+      "Parse_event_information": {
+        "runAfter": {},
+        "type": "ParseJson",
+        "inputs": {
+          "content": "@triggerBody()?['data']",
+          "schema": {
+            "properties": {
+              "Event ID": {
+                "type": "string"
+              },
+              "Event Type": {
+                "type": "string"
+              },
+              "Event Version": {
+                "type": "string"
+              },
+              "Operation Date/Time UTC": {
+                "type": "string"
+              },
+              "Operation ID": {
+                "type": "string"
+              },
+              "Subscription": {
+                "type": "object"
+              }
+            },
+            "type": "object"
+          }
+        }
+      },
+      "Parse_subscription_information": {
+        "runAfter": {
+          "Parse_event_information": [
+            "Succeeded"
+          ]
+        },
+        "type": "ParseJson",
+        "inputs": {
+          "content": "@body('Parse_event_information')?['Subscription']",
+          "schema": {
+            "properties": {
+              "Beneficiary AAD Object ID": {
+                "type": "string"
+              },
+              "Beneficiary AAD Tenant ID": {
+                "type": "string"
+              },
+              "Beneficiary Email Address": {
+                "type": "string"
+              },
+              "Beneficiary User ID": {
+                "type": "string"
+              },
+              "Is Free Trial Subscription?": {
+                "type": "boolean"
+              },
+              "Is Test Subscription?": {
+                "type": "boolean"
+              },
+              "Offer ID": {
+                "type": "string"
+              },
+              "Plan ID": {
+                "type": "string"
+              },
+              "Purchaser AAD Object ID": {
+                "type": "string"
+              },
+              "Purchaser AAD Tenant ID": {
+                "type": "string"
+              },
+              "Purchaser Email Address": {
+                "type": "string"
+              },
+              "Purchaser User ID": {
+                "type": "string"
+              },
+              "Subscription End Date": {
+                "type": "string"
+              },
+              "Subscription ID": {
+                "type": "string"
+              },
+              "Subscription Name": {
+                "type": "string"
+              },
+              "Subscription Start Date": {
+                "type": "string"
+              },
+              "Subscription Status": {
+                "type": "string"
+              },
+              "Subscription Term Unit": {
+                "type": "string"
+              },
+              "Seat Quantity": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              }
+            },
+            "type": "object"
+          }
+        }
+      },
+      "Add_your_integration_logic_here": {
+        "actions": {},
+        "runAfter": {
+          "Parse_subscription_information": [
+            "Succeeded"
+          ]
+        },
+        "type": "Scope"
+      },
+      "Conditional_|_Notify the Marketplace": {
+        "actions": {
+          "Notify_the_marketplace": {
+            "runAfter": {},
+            "type": "Http",
+            "inputs": {
+              "authentication": {
+                "audience": "20e940b3-4c77-4b0b-9a53-9e16a1b010a7",
+                "clientId": "d0267f0e-4678-459e-9208-8e061b545e39",
+                "secret": "mu18Q~Lm48qAJtl12ZwIIeKpd7baV5NRbxXjQdkf",
+                "tenant": "74db66c4-28c1-4667-98d0-b52c23845c04",
+                "type": "ActiveDirectoryOAuth"
+              },
+              "body": {
+                "status": "Success"
+              },
+              "headers": {
+                "content-type": "application/json"
+              },
+              "method": "PATCH",
+              "uri": "https://marketplaceapi.microsoft.com/api/saas/subscriptions/@{body('Parse_subscription_information')?['Subscription ID']}/operations/@{body('Parse_event_information')?['Operation ID']}?api-version=2018-08-31"
+            }
+          }
+        },
+        "runAfter": {
+          "Add_your_integration_logic_here": [
+            "Succeeded"
+          ]
+        },
+        "expression": {
+          "and": [
+            {
+              "equals": [
+                true,
+                true
+              ]
+            },
+            {
+              "equals": [
+                "@body('Parse_subscription_information')?['Is Test Subscription?']",
+                false
+              ]
+            }
+          ]
+        },
+        "type": "If"
+      }
+    }
+  }
+}

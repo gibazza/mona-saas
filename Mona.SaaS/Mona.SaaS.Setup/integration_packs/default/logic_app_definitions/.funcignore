@@ -1,0 +1,7 @@
+.debug
+.git*
+.vscode
+local.settings.json
+test
+.development/
+.logs/

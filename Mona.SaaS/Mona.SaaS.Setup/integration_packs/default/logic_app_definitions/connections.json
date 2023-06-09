@@ -1,0 +1,15 @@
+{
+  "serviceProviderConnections": {},
+  "managedApiConnections": {
+    "mona-events-connection-monapbtest01-std": {
+      "api": {
+        "id": "/subscriptions/@{appsetting('WORKFLOWS_SUBSCRIPTION_ID')}/providers/Microsoft.Web/locations/@{appsetting('WORKFLOWS_LOCATION_NAME')}/managedApis/azureeventgrid"
+      },
+      "connection": {
+        "id": "/subscriptions/@{appsetting('WORKFLOWS_SUBSCRIPTION_ID')}/resourcegroups/@{appsetting('WORKFLOWS_RESOURCE_GROUP_NAME')}/providers/Microsoft.Web/connections/mona-events-connection-monapbtest01-std"
+      },
+      "authentication": "@parameters('mona-events-connection-monapbtest01-std-Auth')",
+      "connectionRuntimeUrl": "@parameters('mona-events-connection-monapbtest01-std-RuntimeUrl')"
+    }
+  }
+}

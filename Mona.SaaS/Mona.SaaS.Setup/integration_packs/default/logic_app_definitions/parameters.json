@@ -1,0 +1,14 @@
+{
+  "mona-events-connection-monapbtest01-std-RuntimeUrl": {
+    "type": "String",
+    "value": ""
+  },
+  "mona-events-connection-monapbtest01-std-Auth": {
+    "type": "Object",
+    "value": {
+      "scheme": "Key",
+      "parameter": "@appsetting('mona-events-connection-monapbtest01-std-RawAuthKey')",
+      "type": "Raw"
+    }
+  }
+}
